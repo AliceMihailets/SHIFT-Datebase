@@ -1,15 +1,15 @@
---домашка №3. 
---1. большой красивый (нет) пакет
+--РґРѕРјР°С€РєР° в„–3. 
+--1. Р±РѕР»СЊС€РѕР№ РєСЂР°СЃРёРІС‹Р№ (РЅРµС‚) РїР°РєРµС‚
 create or replace package ActionsWithProducts is 
 
---добавление товара на склад
+--РґРѕР±Р°РІР»РµРЅРёРµ С‚РѕРІР°СЂР° РЅР° СЃРєР»Р°Рґ
 procedure AddProductToStorage (
   pts_quantity         productsonstorages.quantity%type,
   pts_id_prod          productsonstorages.id_product%type,
   pts_id_storage       productsonstorages.id_storage%type
 );
 
---доваление товара со склада в магазин
+--РґРѕРІР°Р»РµРЅРёРµ С‚РѕРІР°СЂР° СЃРѕ СЃРєР»Р°РґР° РІ РјР°РіР°Р·РёРЅ
 procedure AddProductToStore (
   pis_price            productsinstores.price%type,
   pis_quantity         productsinstores.quantity%type,
@@ -18,13 +18,13 @@ procedure AddProductToStore (
   pis_id_sale          productsinstores.id_sale%type         default null
 );
 
---перемещение товара с одного склада на другой  
+--РїРµСЂРµРјРµС‰РµРЅРёРµ С‚РѕРІР°СЂР° СЃ РѕРґРЅРѕРіРѕ СЃРєР»Р°РґР° РЅР° РґСЂСѓРіРѕР№  
 procedure TransferProductToNewStorage (
   pts_prod_id number,
   pts_storage_id number
 );
 
-end ActionsWithProducts; --конец спецификации на пакет
+end ActionsWithProducts; --РєРѕРЅРµС† СЃРїРµС†РёС„РёРєР°С†РёРё РЅР° РїР°РєРµС‚
 
 /
 
@@ -144,7 +144,7 @@ end;
                                         
 /
 
---2. добавление и перемещение сотрудника в должности 
+--2. РґРѕР±Р°РІР»РµРЅРёРµ Рё РїРµСЂРµРјРµС‰РµРЅРёРµ СЃРѕС‚СЂСѓРґРЅРёРєР° РІ РґРѕР»Р¶РЅРѕСЃС‚Рё 
 create or replace package ForEmployyes as 
 procedure CreateNewEmp (
   p_last_name          employees.last_name%type,
@@ -160,7 +160,7 @@ procedure TransferEmpPosition (
   p_id_emp number,
   p_id_pos number
   );
-end ForEmployyes; --спец
+end ForEmployyes; --СЃРїРµС†
 
 /
 
@@ -251,8 +251,8 @@ begin
 end;
 /
 
---3. добавить скидку + получить все скидки за определенный период 
---добавление
+--3. РґРѕР±Р°РІРёС‚СЊ СЃРєРёРґРєСѓ + РїРѕР»СѓС‡РёС‚СЊ РІСЃРµ СЃРєРёРґРєРё Р·Р° РѕРїСЂРµРґРµР»РµРЅРЅС‹Р№ РїРµСЂРёРѕРґ 
+--РґРѕР±Р°РІР»РµРЅРёРµ
 create or replace procedure AddSale (
   s_size              sales.size_of_sales%type,
   s_prod              sales.id_product_in_store%type,
@@ -287,7 +287,7 @@ begin
 end;
 /
 
---получение
+--РїРѕР»СѓС‡РµРЅРёРµ
 create or replace procedure GetSales (start_date sales.start_date_of_sale%type, end_date sales.end_date_of_sale%type)
 is 
   type rec is record (name_store stores.name_of_store%type, name_product products.name_of_product%type,
@@ -320,7 +320,7 @@ begin
 end;
 /
 
--- 4. получить список всех магазинов
+-- 4. РїРѕР»СѓС‡РёС‚СЊ СЃРїРёСЃРѕРє РІСЃРµС… РјР°РіР°Р·РёРЅРѕРІ
 create or replace procedure ListOfStores 
 is
 type ti is table of stores.name_of_store%type;
@@ -339,7 +339,7 @@ begin
 end;
 /
 
---5. получить список товаров магазинов сети (по имени магазина)
+--5. РїРѕР»СѓС‡РёС‚СЊ СЃРїРёСЃРѕРє С‚РѕРІР°СЂРѕРІ РјР°РіР°Р·РёРЅРѕРІ СЃРµС‚Рё (РїРѕ РёРјРµРЅРё РјР°РіР°Р·РёРЅР°)
 CREATE OR REPLACE PROCEDURE ProductsInStores_Procedure (name_store stores.name_of_store%type)
 IS
 type ti is table of stores.name_of_store%type;
@@ -363,14 +363,14 @@ begin
 end;
 /
 
---6. получить список товаров на складе и их количество для конкретного магазина
+--6. РїРѕР»СѓС‡РёС‚СЊ СЃРїРёСЃРѕРє С‚РѕРІР°СЂРѕРІ РЅР° СЃРєР»Р°РґРµ Рё РёС… РєРѕР»РёС‡РµСЃС‚РІРѕ РґР»СЏ РєРѕРЅРєСЂРµС‚РЅРѕРіРѕ РјР°РіР°Р·РёРЅР°
 CREATE OR REPLACE PROCEDURE QuamtityProducts (name_store stores.name_of_store%type)
 IS
 type rec is record 
 (prod products.name_of_product%type, quantity productsonstorages.quantity%type, address storages.address%type);
 type rec_table is table of rec;
-i rec; --переменная типа rec
-arr rec_table := new rec_table(); --массив 
+i rec; --РїРµСЂРµРјРµРЅРЅР°СЏ С‚РёРїР° rec
+arr rec_table := new rec_table(); --РјР°СЃСЃРёРІ 
 BEGIN
   select products.name_of_product, productsonstorages.quantity, storages.address bulk collect into arr
   from stores  
