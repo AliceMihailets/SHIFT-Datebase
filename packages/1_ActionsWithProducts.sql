@@ -1,14 +1,14 @@
---1. большой красивый (нет) пакет
+--1. Р±РѕР»СЊС€РѕР№ РєСЂР°СЃРёРІС‹Р№ (РЅРµС‚) РїР°РєРµС‚
 create or replace package ActionsWithProducts is 
 
---добавление товара на склад
+--РґРѕР±Р°РІР»РµРЅРёРµ С‚РѕРІР°СЂР° РЅР° СЃРєР»Р°Рґ
 procedure AddProductToStorage (
   pts_quantity         productsonstorages.quantity%type,
   pts_id_prod          productsonstorages.id_product%type,
   pts_id_storage       productsonstorages.id_storage%type
 );
 
---доваление товара со склада в магазин
+--РґРѕРІР°Р»РµРЅРёРµ С‚РѕРІР°СЂР° СЃРѕ СЃРєР»Р°РґР° РІ РјР°РіР°Р·РёРЅ
 procedure AddProductToStore (
   pis_price            productsinstores.price%type,
   pis_quantity         productsinstores.quantity%type,
@@ -17,13 +17,13 @@ procedure AddProductToStore (
   pis_id_sale          productsinstores.id_sale%type         default null
 );
 
---перемещение товара с одного склада на другой  
+--РїРµСЂРµРјРµС‰РµРЅРёРµ С‚РѕРІР°СЂР° СЃ РѕРґРЅРѕРіРѕ СЃРєР»Р°РґР° РЅР° РґСЂСѓРіРѕР№  
 procedure TransferProductToNewStorage (
   pts_prod_id number,
   pts_storage_id number
 );
 
-end ActionsWithProducts; --конец спецификации на пакет
+end ActionsWithProducts; --РєРѕРЅРµС† СЃРїРµС†РёС„РёРєР°С†РёРё РЅР° РїР°РєРµС‚
 
 /
 
