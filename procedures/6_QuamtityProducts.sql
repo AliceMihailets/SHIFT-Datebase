@@ -1,11 +1,11 @@
---6. получить список товаров на складе и их количество для конкретного магазина
+--6. РїРѕР»СѓС‡РёС‚СЊ СЃРїРёСЃРѕРє С‚РѕРІР°СЂРѕРІ РЅР° СЃРєР»Р°РґРµ Рё РёС… РєРѕР»РёС‡РµСЃС‚РІРѕ РґР»СЏ РєРѕРЅРєСЂРµС‚РЅРѕРіРѕ РјР°РіР°Р·РёРЅР°
 CREATE OR REPLACE PROCEDURE QuamtityProducts (name_store stores.name_of_store%type)
 IS
 type rec is record 
 (prod products.name_of_product%type, quantity productsonstorages.quantity%type, address storages.address%type);
 type rec_table is table of rec;
-i rec; --переменная типа rec
-arr rec_table := new rec_table(); --массив 
+i rec; --РїРµСЂРµРјРµРЅРЅР°СЏ С‚РёРїР° rec
+arr rec_table := new rec_table(); --РјР°СЃСЃРёРІ 
 BEGIN
   select products.name_of_product, productsonstorages.quantity, storages.address bulk collect into arr
   from stores  
