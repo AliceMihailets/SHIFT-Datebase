@@ -1,5 +1,5 @@
---3. добавить скидку + получить все скидки за определенный период 
---добавление
+--3. РґРѕР±Р°РІРёС‚СЊ СЃРєРёРґРєСѓ + РїРѕР»СѓС‡РёС‚СЊ РІСЃРµ СЃРєРёРґРєРё Р·Р° РѕРїСЂРµРґРµР»РµРЅРЅС‹Р№ РїРµСЂРёРѕРґ 
+--РґРѕР±Р°РІР»РµРЅРёРµ
 create or replace procedure AddSale (
   s_size              sales.size_of_sales%type,
   s_prod              sales.id_product_in_store%type,
@@ -34,7 +34,7 @@ begin
 end;
 /
 
---получение
+--РїРѕР»СѓС‡РµРЅРёРµ
 create or replace procedure GetSales (start_date sales.start_date_of_sale%type, end_date sales.end_date_of_sale%type)
 is 
   type rec is record (name_store stores.name_of_store%type, name_product products.name_of_product%type,
