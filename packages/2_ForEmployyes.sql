@@ -1,4 +1,4 @@
---2. добавление и перемещение сотрудника в должности 
+--2. РґРѕР±Р°РІР»РµРЅРёРµ Рё РїРµСЂРµРјРµС‰РµРЅРёРµ СЃРѕС‚СЂСѓРґРЅРёРєР° РІ РґРѕР»Р¶РЅРѕСЃС‚Рё 
 create or replace package ForEmployyes as 
 procedure CreateNewEmp (
   p_last_name          employees.last_name%type,
@@ -14,7 +14,7 @@ procedure TransferEmpPosition (
   p_id_emp number,
   p_id_pos number
   );
-end ForEmployyes; --спец
+end ForEmployyes; --СЃРїРµС†
 
 /
 
