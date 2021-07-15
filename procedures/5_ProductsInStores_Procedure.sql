@@ -1,4 +1,4 @@
---5. получить список товаров магазинов сети (по имени магазина)
+--5. РїРѕР»СѓС‡РёС‚СЊ СЃРїРёСЃРѕРє С‚РѕРІР°СЂРѕРІ РјР°РіР°Р·РёРЅРѕРІ СЃРµС‚Рё (РїРѕ РёРјРµРЅРё РјР°РіР°Р·РёРЅР°)
 CREATE OR REPLACE PROCEDURE ProductsInStores_Procedure (name_store stores.name_of_store%type)
 IS
 type ti is table of stores.name_of_store%type;
