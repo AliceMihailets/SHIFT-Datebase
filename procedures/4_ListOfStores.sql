@@ -1,4 +1,4 @@
--- 4. получить список всех магазинов
+-- 4. РїРѕР»СѓС‡РёС‚СЊ СЃРїРёСЃРѕРє РІСЃРµС… РјР°РіР°Р·РёРЅРѕРІ
 create or replace procedure ListOfStores 
 is
 type ti is table of stores.name_of_store%type;
