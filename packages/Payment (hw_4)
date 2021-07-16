@@ -1,0 +1,216 @@
+reate or replace package Payment is
+
+  --создание чека
+  function CreateCheck (
+    cc_date                  orders.date_of_order%type,
+    cc_id_store              orders.id_store%type,
+    cc_id_seller             orders.id_seller%type
+  ) return number;
+
+  --создание записи в чеке
+  procedure CreateCheckRow ( 
+    ccr_quintity_of_prod     productsfororder.quantity%type,
+    ccr_id_check             productsfororder.id_order%type,
+    ccr_id_prod              productsfororder.id_product%type
+  );
+
+  --получаем сумму с чека  
+  procedure GetCheckSum (
+    gcs_id_check             orders.id_order%type,
+    needSale                 pls_integer
+  );
+
+end Payment;
+
+/
+
+create or replace package body Payment is
+
+  --вычитаем купленные товары из магазина 
+  procedure MinusProductFromStore (
+    mpfs_id_store            productsinstores.id_store%type,
+    mpfs_id_prod_store       productsinstores.id_product_in_store%type,
+    mpfs_quantity            productsinstores.quantity%type
+  ) is
+  begin
+    update productsinstores set quantity = quantity - mpfs_quantity 
+                            where id_product_in_store = mpfs_id_prod_store;
+    commit;
+  end;
+  
+  --получаем размер скидки на товар 
+  function GetSale (
+    current_date date, 
+    my_id_shop stores.id_store%type,
+    my_id_prod products.id_product%type
+  ) return sales.size_of_sales%type is
+    i sales.size_of_sales%type; 
+    begin 
+      begin 
+        select nvl(s.size_of_sales,0) into i
+        from sales s
+        join typesofsales tos on s.type_of_sale = tos.id_type_of_sale
+        --передали айди магазина и текущую дату
+        where s.id_shop = my_id_shop 
+        and s.start_date_of_sale <= current_date
+        and s.end_date_of_sale >= current_date
+        and tos.id_category = (select c.id_category
+                               from categories c
+                               join products p on c.id_category = p.id_category
+                               where p.id_product = my_id_prod)
+        and tos.id_product is null;
+        exception 
+        when no_data_found then 
+          dbms_output.put_line('category not found');
+          i := 0;
+      end;
+      
+      if (i = 0) then
+      
+       begin 
+        select nvl(s.size_of_sales,0) into i
+        from sales s
+        join typesofsales tos on s.type_of_sale = tos.id_type_of_sale
+        --передали айди магазина и текущую дату
+        where s.id_shop = my_id_shop 
+        and s.start_date_of_sale <= current_date
+        and s.end_date_of_sale >= current_date
+        and tos.id_category is null
+        and tos.id_product = my_id_prod;
+        exception 
+        when no_data_found then 
+          dbms_output.put_line('product not found');
+          i := 0;
+      end;    
+    end if;   
+    return i;    
+  end GetSale;
+  
+  --получаем сумму чека
+  procedure GetCheckSum (
+    gcs_id_check             orders.id_order%type,
+    needSale                 pls_integer
+  ) is
+    date_check               orders.date_of_order%type;
+    size_sale                sales.size_of_sales%type;
+    sum_check                number;
+    begin
+      select ord.date_of_order into date_check
+      from orders ord
+      where ord.id_order = gcs_id_check;
+      
+      for k in (     
+        select pis.id_store as shop, pis.id_product_in_store as prod, pfo.quantity as quantity, pis.price as price
+        from productsinstores pis 
+        join productsfororder pfo on pis.id_product = pfo.id_product
+        join orders ord on pfo.id_order = ord.id_order
+        where ord.id_order = gcs_id_check        
+      )
+      loop
+        size_sale := GetSale (date_check, k.shop, k.prod);
+        sum_check := nvl(sum_check, 0) + (k.price - k.price / 100 * size_sale) * k.quantity;
+      end loop;
+      dbms_output.put_line('Check № ' || gcs_id_check || '   -   ' || date_check || '   -   ' || sum_check || ' $');
+    end;
+  
+  procedure CreateCheckRow ( 
+    ccr_quintity_of_prod     productsfororder.quantity%type,
+    ccr_id_check             productsfororder.id_order%type,
+    ccr_id_prod              productsfororder.id_product%type
+  ) is
+    size_sale                sales.size_of_sales%type;
+    date_check               orders.date_of_order%type;
+    type rec is record (
+      id_check               orders.id_order%type,
+      prod_name              products.name_of_product%type,
+      quantity_prod          productsfororder.quantity%type,
+      price                  productsfororder.cost_of_product%type,
+      size_sale              sales.size_of_sales%type,
+      price_new              productsfororder.cost_of_product%type
+    );
+    type rec_table is table of rec;
+    i rec_table;      
+    
+    begin
+      insert into productsfororder (id_product_for_order,
+                                    quantity,
+                                    id_order,
+                                    id_product)
+                                    values (sq_ai_table.nextval,
+                                    ccr_quintity_of_prod,
+                                    ccr_id_check,
+                                    ccr_id_prod);
+      commit;
+      dbms_output.put_line('all right! check_row created');
+      
+      select ord.id_store into id_store from orders ord where ord.id_order = ccr_id_check; --!
+      MinusProductFromStore(id_store, ccr_id_prod, ccr_quintity_of_prod); --!
+      dbms_output.put_line('all right! minus product');
+      commit;
+      
+      select ord.date_of_order into date_check from orders ord where ord.id_order = ccr_id_check;
+      size_sale := GetSale(date_check, id_store, ccr_id_prod);
+      
+      select ord.id_order, p.name_of_product, pfo.quantity, pfo.cost_of_product * pfo.quantity, size_sale,
+      (pfo.cost_of_product - (pfo.quantity / 100 * size_sale)) * pfo.quantity bulk collect into i
+      from orders ord
+      join productsfororder pfo on ord.id_order = pfo.id_order
+      join products p on pfo.id_product = p.id_product
+      where ord.id_order = ccr_id_check;
+      for k in 1..i.count
+        loop
+          dbms_output.put_line(i(k).id_check || '   ' || i(k).prod_name || '   ' || i(k).quantity_prod || '   '
+                               || i(k).price || '   ' || i(k).size_sale || '   ' || i(k).price_new);
+        end loop;
+    exception  
+      when others  then dbms_output.put_line('error in CreateCheckRow');     
+    end;
+  
+  function CreateCheck (
+    cc_date                  orders.date_of_order%type,
+    cc_id_store              orders.id_store%type,
+    cc_id_seller             orders.id_seller%type
+  ) return number is
+  id_check orders.id_order%type;
+  
+  begin
+    insert into orders (id_order,
+                        date_of_order,
+                        id_store,
+                        id_seller)
+                        values(sq_ai_table.nextval,
+                        cc_date,
+                        cc_id_store,
+                        cc_id_seller) returning id_order into id_check;
+    commit;
+    return id_check;                    
+  end;
+  
+end Payment;  
+
+/
+
+declare 
+k number;
+begin
+  k := Payment.CreateCheck(cc_date      => TO_DATE('16072021','DDMMYYYY'),
+                           cc_id_store  => 1,
+                           cc_id_seller => 3);
+  dbms_output.put_line(k);
+end;
+
+/
+
+begin
+  Payment.CreateCheckRow(ccr_quintity_of_prod => 7,
+                         ccr_id_check         => 185,
+                         ccr_id_prod          => 8);
+end;
+
+/
+
+begin
+  Payment.GetCheckSum(gcs_id_check => 185, needSale => 1);
+end;
+
+/
